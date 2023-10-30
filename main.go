@@ -2,6 +2,7 @@ package main
 
 import (
 	"ai/dataframe"
+	"fmt"
 )
 
 func main() {
@@ -20,9 +21,19 @@ func main() {
 
 	df.OneHotEncode("State")
 
-	corrDf := df.Correlation()
-	corrDf.GetCol(1)
+	// corrDf := df.Correlation()
 	// corrDf.Show(true)
+
+	df.Drop("Administration")
+	df.Head()
+
+	y := df.GetCol("Profit")
+
+	fmt.Println(y)
+
+	df.Drop("Profit")
+
+	x := df.Data
 
 	// df.Head(5)
 

@@ -15,14 +15,18 @@ type DataFrame struct {
 	Data   [][]interface{}
 }
 
-func (d *DataFrame) Show(headerAsRow bool) {
+func (d *DataFrame) Show(headerAsRow ...bool) {
+	showHeader := true
+	if len(headerAsRow) == 0 {
+		showHeader = false
+	}
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 5, ' ', 0)
 	for idx, row := range d.Data {
 		if idx == 0 && d.Header != nil {
 			fmt.Fprintln(w, fmt.Sprintf("\t%s", strings.Join(d.Header, "\t")))
 		}
 		var line string
-		if headerAsRow {
+		if showHeader {
 			// fmt.Println(len(d.Data))
 			// fmt.Println(len(d.Data[0]))
 			// fmt.Println(d.Data[0])
@@ -38,7 +42,13 @@ func (d *DataFrame) Show(headerAsRow bool) {
 	w.Flush()
 }
 
-func (d *DataFrame) Head(n int) {
+func (d *DataFrame) Head(n ...int) {
+	var length int
+	if len(n) == 0 {
+		length = 10
+	} else {
+		length = n[0]
+	}
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 5, ' ', 0)
 	for idx, row := range d.Data {
 		if idx == 0 && d.Header != nil {
@@ -46,7 +56,7 @@ func (d *DataFrame) Head(n int) {
 		}
 		line := fmt.Sprintf("%d\t%s", idx+1, strings.Join(stringify(row), "\t"))
 		fmt.Fprintln(w, line)
-		if idx == n-1 {
+		if idx == length-1 {
 			break
 		}
 	}
@@ -127,31 +137,41 @@ func (d *DataFrame) GetRow(rowNum int) []interface{} {
 // GetCol
 //
 // Returns a column of given column number
-func (d *DataFrame) GetCol(colNum int) []interface{} {
+func (d *DataFrame) GetCol(header interface{}) []interface{} {
 	if len(d.Data) == 0 {
 		panic("No data in dataframe")
 	}
-	data := make([]interface{}, len(d.Data))
 
+	data := make([]interface{}, len(d.Data))
+	if v, ok := header.(int); ok {
+		for i := range d.Data {
+			data[i] = d.Data[i][v]
+		}
+
+		return data
+	}
+
+	colNum := d.FindHeader(header.(string))
 	for i := range d.Data {
 		data[i] = d.Data[i][colNum]
 	}
 
 	return data
+
 }
 
 // OneHotEncode
 //
 // Encode string data into int
 // It takes the header's name as an argument
-func (d *DataFrame) OneHotEncode(headerName string) {
+func (d *DataFrame) OneHotEncode(header interface{}) {
 	encodeMap := make(map[string]float64)
 
 	var colNum int
-	for i, h := range d.Header {
-		if h == headerName {
-			colNum = i
-		}
+	if v, ok := header.(int); ok {
+		colNum = v
+	} else {
+		colNum = d.FindHeader(header.(string))
 	}
 
 	for i, v := range d.GetCol(colNum) {
@@ -185,6 +205,7 @@ func (d *DataFrame) Correlation() DataFrame {
 }
 
 func (d *DataFrame) setHeader(headers []string) {
+	d.Header = []string{}
 	for _, h := range headers {
 		d.Header = append(d.Header, h)
 	}
@@ -199,4 +220,46 @@ func castFloat(x []interface{}) []float64 {
 	}
 
 	return data
+}
+
+func (d *DataFrame) FindHeader(header string) int {
+	for i, h := range d.Header {
+		if h == header {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func (d *DataFrame) Drop(headers ...interface{}) {
+	var colNum int
+
+	for _, h := range headers {
+		if v, ok := h.(int); ok {
+			colNum = v
+		} else {
+			colNum = d.FindHeader(h.(string))
+		}
+
+		if colNum == -1 {
+			panic("Header not found")
+		}
+
+		newHeader := make([]string, len(d.Header)-1)
+		copy(newHeader[:colNum], d.Header[:colNum])
+		copy(newHeader[colNum:], d.Header[colNum+1:])
+
+		d.setHeader(newHeader)
+
+		newData := [][]interface{}{}
+		for _, row := range d.Data {
+			newRow := make([]interface{}, len(row)-1)
+			copy(newRow[:colNum], row[:colNum])
+			copy(newRow[colNum:], row[colNum+1:])
+			newData = append(newData, newRow)
+		}
+
+		d.Data = newData
+	}
 }
