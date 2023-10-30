@@ -7,11 +7,26 @@ type Normalizer struct {
 	Max float64
 }
 
-func (n *Normalizer) FitTransform(x []float64) []float64 {
-	n.Min = formula.Min(x)
-	n.Max = formula.Max(x)
+func (n *Normalizer) FitTransform(data [][]float64) [][]float64 {
+	normalizedDatas := [][]float64{}
 
-	return n.Fit(x)
+	for _, x := range data {
+		n.Min = formula.Min(x)
+		n.Max = formula.Max(x)
+
+		normalizedDatas = append(normalizedDatas, n.Fit(x))
+	}
+
+	return normalizedDatas
+}
+
+func (n *Normalizer) FitMultiple(data [][]float64) [][]float64 {
+	normalizedDatas := [][]float64{}
+
+	for _, x := range data {
+		normalizedDatas = append(normalizedDatas, n.Fit(x))
+	}
+	return normalizedDatas
 }
 
 func (n *Normalizer) Fit(x []float64) []float64 {

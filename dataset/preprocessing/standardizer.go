@@ -12,11 +12,25 @@ type Standardizer struct {
 // Use this when declaring the standardizer.
 // It will use the input data to standardize the future input
 // when using Fit()
-func (s *Standardizer) FitTransform(x []float64) []float64 {
-	s.Mean = formula.Mean(x)
-	s.StandardDeviation = formula.StandardDeviation(x, s.Mean)
+func (s *Standardizer) FitTransform(data [][]float64) [][]float64 {
+	standardizedDatas := [][]float64{}
+	for _, x := range data {
+		s.Mean = formula.Mean(x)
+		s.StandardDeviation = formula.StandardDeviation(x, s.Mean)
 
-	return s.Fit(x)
+		standardizedDatas = append(standardizedDatas, s.Fit(x))
+	}
+
+	return standardizedDatas
+}
+
+func (s *Standardizer) FitMultiple(data [][]float64) [][]float64 {
+	standardizedDatas := [][]float64{}
+	for _, x := range data {
+		standardizedDatas = append(standardizedDatas, s.Fit(x))
+	}
+
+	return standardizedDatas
 }
 
 // Fit

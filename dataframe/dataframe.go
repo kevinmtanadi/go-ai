@@ -263,3 +263,12 @@ func (d *DataFrame) Drop(headers ...interface{}) {
 		d.Data = newData
 	}
 }
+
+func (d *DataFrame) GetFloatData() [][]float64 {
+	floatData := [][]float64{}
+	for _, data := range d.Data {
+		floatData = append(floatData, castFloat(data))
+	}
+
+	return floatData
+}
