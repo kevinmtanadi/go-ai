@@ -14,7 +14,9 @@ type LinearRegression struct {
 	Cost         []float64
 }
 
-func (m *LinearRegression) Train()
+func (m *LinearRegression) Train() {
+
+}
 
 func (m *LinearRegression) w0Exe(y, yPredict []float64) float64 {
 	n := float64(len(y))
@@ -29,6 +31,6 @@ func (m *LinearRegression) wExe(x [][]float64, y, yPredict []float64, featureInd
 	return (math.Pow(ans, -2) / n) * ans
 }
 
-func (m *LinearRegression) yExe(x [][]float64) float64 {
-	return m.W0 + formula.Dot(x, m.Wi)
-}
+// func (m *LinearRegression) yExe(x [][]float64) float64 {
+// 	return m.W0 + formula.Dot(x, m.Wi)
+// }

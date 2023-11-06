@@ -27,12 +27,6 @@ func (d *DataFrame) Show(headerAsRow ...bool) {
 		}
 		var line string
 		if showHeader {
-			// fmt.Println(len(d.Data))
-			// fmt.Println(len(d.Data[0]))
-			// fmt.Println(d.Data[0])
-			// if len(d.Data) != len(d.Data[0]) {
-			// 	panic("Dimension mismatch")
-			// }
 			line = fmt.Sprintf("%s\t%s", d.Header[idx], strings.Join(stringify(row), "\t"))
 		} else {
 			line = fmt.Sprintf("%d\t%s", idx+1, strings.Join(stringify(row), "\t"))
@@ -136,27 +130,36 @@ func (d *DataFrame) GetRow(rowNum int) []interface{} {
 
 // GetCol
 //
-// Returns a column of given column number
-func (d *DataFrame) GetCol(header interface{}) []interface{} {
+// Returns a column of given column number or name
+func (d *DataFrame) GetCol(header interface{}) *DataFrame {
+
+	newDf := DataFrame{}
+
 	if len(d.Data) == 0 {
 		panic("No data in dataframe")
 	}
 
 	data := make([]interface{}, len(d.Data))
 	if v, ok := header.(int); ok {
+		newDf.setHeader([]string{d.Header[v]})
 		for i := range d.Data {
 			data[i] = d.Data[i][v]
 		}
 
-		return data
+		newDf.Data = append(newDf.Data, data)
+
+		return &newDf
 	}
 
 	colNum := d.FindHeader(header.(string))
+	newDf.setHeader([]string{d.Header[colNum]})
 	for i := range d.Data {
 		data[i] = d.Data[i][colNum]
 	}
 
-	return data
+	newDf.Data = append(newDf.Data, data)
+
+	return &newDf
 
 }
 
@@ -174,7 +177,7 @@ func (d *DataFrame) OneHotEncode(header interface{}) {
 		colNum = d.FindHeader(header.(string))
 	}
 
-	for i, v := range d.GetCol(colNum) {
+	for i, v := range d.GetCol(colNum).Data[0] {
 		if _, ok := encodeMap[v.(string)]; !ok {
 			encodeMap[v.(string)] = float64(len(encodeMap))
 		}
@@ -191,7 +194,7 @@ func (d *DataFrame) Correlation() DataFrame {
 	for i := 0; i < length; i++ {
 		corrLine := make([]float64, length)
 		for j := 0; j < length; j++ {
-			corrLine[j] = formula.Correlation(castFloat(d.GetCol(i)), castFloat(d.GetCol(j)))
+			corrLine[j] = formula.Correlation(d.GetCol(i).GetFloatData()[0], d.GetCol(j).GetFloatData()[0])
 		}
 		corrTable = append(corrTable, corrLine)
 	}

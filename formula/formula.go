@@ -2,6 +2,7 @@ package formula
 
 import (
 	"math"
+	"sort"
 )
 
 func Dot(x, y []float64) float64 {
@@ -106,4 +107,55 @@ func Correlation(x, y []float64) float64 {
 
 	corr := pembilang / math.Sqrt(pembagi1*pembagi2)
 	return corr
+}
+
+func MergeSort(arr []float64) []float64 {
+	if len(arr) <= 1 {
+		return arr
+	}
+
+	mid := len(arr) / 2
+	left := MergeSort(arr[:mid])
+	right := MergeSort(arr[mid:])
+
+	return merge(left, right)
+}
+
+func merge(left, right []float64) []float64 {
+	result := make([]float64, 0, len(left)+len(right))
+	i, j := 0, 0
+
+	for i < len(left) && j < len(right) {
+		if left[i] <= right[j] {
+			result = append(result, left[i])
+			i++
+		} else {
+			result = append(result, right[j])
+			j++
+		}
+	}
+
+	result = append(result, left[i:]...)
+	result = append(result, right[j:]...)
+
+	return result
+}
+
+func Sort(data [][]float64) {
+	sort.Slice(data, func(i, j int) bool {
+		return data[i][0] < data[j][0]
+	})
+}
+
+func MinkowskiDistance(p1, p2 []float64, r float64) float64 {
+	if len(p1) != len(p2) {
+		panic("Dimension mismatch")
+	}
+
+	var sum float64
+	for i := 0; i < len(p1); i++ {
+		sum += math.Pow(math.Abs(p1[i]-p2[i]), r)
+	}
+
+	return math.Pow(sum, 1/r)
 }

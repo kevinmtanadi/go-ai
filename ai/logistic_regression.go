@@ -2,7 +2,6 @@ package ai
 
 import (
 	"ai/formula"
-	"ai/helpers"
 	"fmt"
 	"math"
 
@@ -20,14 +19,15 @@ type LogisticRegression struct {
 }
 
 func (m *LogisticRegression) Train(x [][]float64, y []float64) {
-	m.Wi = []float64{0, 0}
+	m.Wi = make([]float64, len(x[0]))
 	m.W0 = 0.
 
 	for epoch := 0; epoch < m.Epochs; epoch++ {
 		yPredict := m.Predict(x)
-		m.W0 = m.W0 - m.LearningRate*w0Exe(y, yPredict)
-		m.Wi[0] = m.Wi[0] - m.LearningRate*wExe(x, y, yPredict, 0)
-		m.Wi[1] = m.Wi[1] - m.LearningRate*wExe(x, y, yPredict, 1)
+		m.W0 = m.W0 - m.LearningRate*m.w0Exe(y, yPredict)
+		for i := range m.Wi {
+			m.Wi[i] = m.Wi[i] - m.LearningRate*m.wExe(x, y, yPredict, i)
+		}
 		costVal := m.costF(x, y, m.W0, m.Wi)
 		m.Cost = append(m.Cost, costVal)
 	}
@@ -40,17 +40,33 @@ func (m *LogisticRegression) Predict(x [][]float64) []float64 {
 		for j := range x[i] {
 			z += m.Wi[j] * x[i][j]
 		}
-		yPredict[i] = 1.0 / (1.0 + math.Exp(-z))
+
+		yPredict[i] = 1.0 / (1.0 + formula.Exp(-z))
 	}
 	return yPredict
 }
 
-func w0Exe(y, yPredict []float64) float64 {
-	return formula.Sum(formula.ArraySubtract(yPredict, y))
+func (m *LogisticRegression) w0Exe(y, yPredict []float64) float64 {
+	// return formula.Sum(formula.ArraySubtract(yPredict, y))
+
+	sum := 0.
+
+	for i := range y {
+		sum += (yPredict[i] - y[i])
+	}
+
+	return sum
 }
 
-func wExe(x [][]float64, y, yPredict []float64, featureIndex int) float64 {
-	return formula.Sum(formula.ArrayMultiplication(formula.ArraySubtract(yPredict, y), helpers.ExtractColumn(x, featureIndex)))
+func (m *LogisticRegression) wExe(x [][]float64, y, yPredict []float64, featureIndex int) float64 {
+	sum := 0.
+
+	for i := range y {
+		sum += (yPredict[i] - y[i]) * x[i][featureIndex]
+	}
+
+	return sum
+	// return formula.Sum(formula.ArrayMultiplication(formula.ArraySubtract(yPredict, y), helpers.ExtractColumn(x, featureIndex)))
 }
 
 func (m *LogisticRegression) costF(x [][]float64, y []float64, w0 float64, wi []float64) float64 {
