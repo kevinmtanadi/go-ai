@@ -11,10 +11,15 @@ require (
 	github.com/go-pdf/fpdf v0.9.0 // indirect
 	github.com/goccmack/gocc v0.0.0-20230228185258-2292f9e40198 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/jedib0t/go-pretty/v6 v6.4.9 // indirect
+	github.com/kevinmtanadi/godf v0.1.4 // indirect
+	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	gonum.org/v1/gonum v0.14.0 // indirect

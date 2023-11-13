@@ -1,6 +1,7 @@
 package formula
 
 import (
+	"fmt"
 	"math"
 	"sort"
 )
@@ -149,7 +150,7 @@ func Sort(data [][]float64) {
 
 func MinkowskiDistance(p1, p2 []float64, r float64) float64 {
 	if len(p1) != len(p2) {
-		panic("Dimension mismatch")
+		panic(fmt.Sprintf("Dimension mismatch {%d, %d}", len(p1), len(p2)))
 	}
 
 	var sum float64

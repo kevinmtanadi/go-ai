@@ -84,6 +84,9 @@ func (d *DataFrame) ReadCSV(filename string) {
 	for {
 		data, err := reader.Read()
 		if err != nil {
+			if err.Error() != "EOF" {
+				panic(err)
+			}
 			break
 		}
 
