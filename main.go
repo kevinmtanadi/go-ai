@@ -2,80 +2,41 @@ package main
 
 import (
 	"ai/ai"
+	"ai/formula"
 	"fmt"
-
-	"github.com/kevinmtanadi/godf"
 )
 
 func main() {
-	df := godf.ReadCSV("data/winequalityN.csv")
-	// df.Scramble(5019320)
-	// df.Head(30)
 
-	shouldRun := true
+	x := [][]float64{{2.0}}
+	y := []float64{3.0}
 
-	df.Info()
-	df.OneHotEncode("type")
-	// df.Scramble()
+	// test1 := []float64{1.5, 2, 2.5, 3.0}
+	// test2 := [][]float64{
+	// 	{1.0, 0.75, 0.5, 0.25},
+	// 	{0., 0.25, 0.5, 0.75},
+	// }
 
-	df.Head()
-	// df.Corr(
+	// fmt.Println(formula.MatrixMultiplication(test1, test2))
 
-	df.GetRow(16, 17, 18).Show()
+	w1 := [][]float64{{0.25, 0.5, 0.75, 1.0}}
+	b1 := []float64{1.0, 1.0, 1.0, 1.0}
 
-	if shouldRun {
-		yHeaderName := "quality"
+	w2 := [][]float64{
+		{1.0, 0.75, 0.5, 0.25},
+		{0., 0.25, 0.5, 0.75},
+	}
+	b2 := []float64{1.0, 1.0}
 
-		y := df.GetCol(yHeaderName).ExtractData().([]interface{})
-		df.DropCol(yHeaderName)
-		x := df.Transpose().ExtractData().([][]interface{})
+	fmt.Println(formula.MatrixMultiplication(x, w1))
 
-		castedX := Convert2DFloat(x)
-		castedY := Convert1DFloat(y)
+	nn := ai.CreateNN()
+	nn.SetWeights(w1, b1, 0)
+	nn.SetWeights(w2, b2, 1)
 
-		trainSize := 0.8
-		n := int(trainSize * float64(len(castedY)))
-		xTrain := castedX[:n]
-		yTrain := castedY[:n]
-		xTest := castedX[n:]
-		yTest := castedY[n:]
-
-		fmt.Println(len(xTrain), len(xTest))
-		fmt.Println(len(xTrain[0]), len(xTest[0]))
-
-		bestAcc := 0.
-		k := 0
-
-		fmt.Println("Start predicting")
-		for i := 1; i <= 5; i++ {
-			model := ai.NewKNN(i, 2, xTrain, yTrain)
-
-			yPred := model.Predict(xTest)
-			correct := 0.
-			for i, v := range yPred {
-				if v == yTest[i] {
-					correct++
-				}
-			}
-			acc := correct / float64(len(yPred)) * 100
-			fmt.Println("Accuracy on k: ", i, ": ", acc, "%")
-			if acc > bestAcc {
-				bestAcc = acc
-				k = i
-			}
-		}
-
-		fmt.Println("Best accuracy: ", bestAcc, " on k: ", k)
-
-		bestModel := ai.NewKNN(1, 2, xTrain, yTrain)
-		yPred := bestModel.Predict(xTest)
-
-		comDf := godf.DataFrame(map[string]interface{}{
-			"y_test": yTest,
-			"y_pred": yPred,
-		})
-
-		comDf.Show()
+	for _, wL := range nn.Layers {
+		fmt.Println(wL.Weights)
 	}
 
+	nn.Train(x, y)
 }

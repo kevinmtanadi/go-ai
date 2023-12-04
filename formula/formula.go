@@ -160,3 +160,42 @@ func MinkowskiDistance(p1, p2 []float64, r float64) float64 {
 
 	return math.Pow(sum, 1/r)
 }
+
+func MatrixMultiplication(x [][]float64, y [][]float64) [][]float64 {
+	r1 := len(x)
+	c1 := len(x[0])
+	r2 := len(y)
+	c2 := len(y[0])
+
+	if c1 != r2 {
+		panic(fmt.Sprintf("Dimension mismatch {%d, %d} x {%d, %d}", r1, c1, r2, c2))
+	}
+
+	result := make([][]float64, r1)
+	for i := range result {
+		result[i] = make([]float64, c2)
+	}
+
+	for i := 0; i < r1; i++ {
+		for j := 0; j < c2; j++ {
+			for k := 0; k < c1; k++ {
+				result[i][j] += x[i][k] * y[k][j]
+			}
+		}
+	}
+
+	return result
+}
+
+func Transpose(x [][]float64) [][]float64 {
+	result := [][]float64{}
+	for i := 0; i < len(x[0]); i++ {
+		row := []float64{}
+		for j := 0; j < len(x); j++ {
+			row = append(row, x[j][i])
+		}
+		result = append(result, row)
+	}
+
+	return result
+}
